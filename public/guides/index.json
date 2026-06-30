@@ -1,0 +1,46 @@
+[
+  {
+  "id": 4,
+  "title": "副本攻略一站式指南",
+  "game": "诛仙世界",
+  "category": "副本",
+  "emoji": "🧭",
+  "date": "2025-12-31",
+  "excerpt": "副本攻略一站式指南",
+  "recommend": false,
+  "file": "guide-4.md" 
+  },
+  {
+  "id": 3,
+  "title": "各职业攻略一站式指南",
+  "game": "诛仙世界",
+  "category": "职业",
+  "emoji": "👊",
+  "date": "2025-12-31",
+  "excerpt": "各职业攻略一站式指南",
+  "recommend": true,
+  "file": "guide-3.md" 
+  },
+  {
+  "id": 2,
+  "title": "游戏画质设置指南",
+  "game": "诛仙世界",
+  "category": "入门",
+  "emoji": "🔧",
+  "date": "2025-12-25",
+  "excerpt": "优化游戏设置，提升游戏体验。",
+  "recommend": false,
+  "file": "guide-2.md" 
+  },
+  {
+    "id": 1,
+    "title": "萌新&回归玩家一站式指南",
+    "game": "诛仙世界",
+    "category": "入门",
+    "emoji": "🌱",
+    "date": "2025-12-23",
+    "excerpt": "持续更新的 PVE、PVP、时装、刷分等新手&回归实用帖/视频索引。",
+    "recommend": true,
+    "file": "guide-1.md"
+  }
+]
