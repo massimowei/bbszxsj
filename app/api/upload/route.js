@@ -3,13 +3,18 @@ import { checkAuth } from '../../admin/actions.js';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
+import sharp from 'sharp';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
 
+/* Compression targets — web-friendly defaults */
+const MAX_WIDTH = 1920;           // covers 1080p / retina 960px viewport
+const WEBP_QUALITY = 78;          // sweet spot: < 100 KB for most screenshots
+const MIN_QUALITY = 58;           // fallback if still oversized
+
 export async function POST(request) {
-  // Auth check
   if (!(await checkAuth())) {
     return NextResponse.json({ error: '未授权' }, { status: 401 });
   }
@@ -36,22 +41,52 @@ export async function POST(request) {
       );
     }
 
-    // Ensure uploads directory exists
     await mkdir(UPLOAD_DIR, { recursive: true });
 
-    // Generate unique filename: timestamp + random hash + original extension
-    const ext = path.extname(file.name) || '.jpg';
+    const inputBuffer = Buffer.from(await file.arrayBuffer());
     const hash = crypto.randomBytes(6).toString('hex');
     const timestamp = Date.now();
-    const filename = `${timestamp}-${hash}${ext}`;
+    const filename = `${timestamp}-${hash}.webp`;
+    const meta = await sharp(inputBuffer).metadata();
 
-    // Write file
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(UPLOAD_DIR, filename), buffer);
+    /* ── Compress via sharp ── */
+    let pipeline = sharp(inputBuffer, { animated: meta.format === 'gif' });
 
-    const url = `/uploads/${filename}`;
+    // Resize only if wider than target
+    if (meta.width > MAX_WIDTH) {
+      pipeline = pipeline.resize({ width: MAX_WIDTH, withoutEnlargement: true });
+    }
 
-    return NextResponse.json({ url, filename, size: file.size });
+    // First pass at quality 78
+    let outputBuffer = await pipeline
+      .webp({ quality: WEBP_QUALITY, effort: 5 })
+      .withMetadata({ exif: {} })                     // strip sensitive EXIF
+      .toBuffer();
+
+    // If still > 100 KB, re-compress harder
+    if (outputBuffer.length > 100 * 1024) {
+      outputBuffer = await sharp(inputBuffer)
+        .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+        .webp({ quality: MIN_QUALITY, effort: 6 })
+        .withMetadata({ exif: {} })
+        .toBuffer();
+    }
+
+    await writeFile(path.join(UPLOAD_DIR, filename), outputBuffer);
+
+    const originalKB = (file.size / 1024).toFixed(0);
+    const resultKB = (outputBuffer.length / 1024).toFixed(0);
+
+    return NextResponse.json({
+      url: `/uploads/${filename}`,
+      filename,
+      size: outputBuffer.length,
+      compressed: {
+        originalKB: Number(originalKB),
+        resultKB: Number(resultKB),
+        format: 'webp',
+      },
+    });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: '上传失败，请重试' }, { status: 500 });
