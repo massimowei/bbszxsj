@@ -1,5 +1,7 @@
 import '../page.css';
 import Layout from '../components/Layout';
+
+export const dynamic = 'force-dynamic';
 import { fetchGuides } from '../../lib/guides.js';
 import GuideSearchAndFavorites from './GuideSearchAndFavorites';
 

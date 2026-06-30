@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import '../../page.css';
+
+export const dynamic = 'force-dynamic';
 import Layout from '../../components/Layout';
 import { fetchGuideById } from '../../../lib/guides.js';
 import MarkdownRenderer from './MarkdownRenderer';

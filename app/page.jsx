@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import './page.css';
+
+export const dynamic = 'force-dynamic';
 import Layout from './components/Layout';
 import { fetchGuides } from '../lib/guides.js';
 import { fetchAnnouncements } from '../lib/announcements.js';
