@@ -40,6 +40,7 @@ export default function TinyEditor({ value, onChange, placeholder }) {
           onChange?.(content);
         }}
         init={{
+          license_key: 'gpl',
           height: 520,
           menubar: false,
           placeholder: placeholder || '开始撰写正文...',
