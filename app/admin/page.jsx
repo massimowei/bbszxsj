@@ -2,10 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import '../page.css';
 import { checkAuth, login, logout } from './actions';
-import MarkdownRenderer from '../guides/[id]/MarkdownRenderer';
 import Layout from '../components/Layout';
 import ActionButton from './components/ActionButton';
 import Field from './components/Field';
@@ -13,13 +11,14 @@ import StatusNote from './components/StatusNote';
 import ConfirmDialog from './components/ConfirmDialog';
 import IconPicker from './components/IconPicker';
 import ImageUpload from './components/ImageUpload';
+import RichTextEditor from './components/RichTextEditor';
+import PreviewModal from './components/PreviewModal';
 import EventManager from './EventManager';
 import AnnouncementManager from './AnnouncementManager';
 import {
   inputStyle,
   textareaStyle,
   toggleRowStyle,
-  previewBoxStyle,
   sideCardStyle,
   sideEyebrowStyle,
   tagStyle,
@@ -39,20 +38,6 @@ const EMPTY_GUIDE = {
   cover_image: '',
   banner_image: '',
 };
-
-const CONTENT_EXAMPLE = `## 副本概览
-
-- 推荐人数：10 人
-- 适合装等：基础毕业后
-- 核心目标：先看机制，再看站位
-
-### 视频嵌入
-<iframe src="//player.bilibili.com/player.html?isOutside=true&bvid=BV1gz6QYzE1U&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>
-
-### 注意事项
-1. 每段尽量只讲一个重点。
-2. 小标题建议按首领或阶段拆分。
-3. B 站链接和 iframe 都支持。`;
 
 function formatGuide(guide = EMPTY_GUIDE) {
   return {
@@ -99,7 +84,7 @@ export default function AdminPage() {
   const [dragGuideId, setDragGuideId] = useState(null);
   const [viewMode, setViewMode] = useState('guides');
   const [categoryFilter, setCategoryFilter] = useState('全部');
-  const [sideTab, setSideTab] = useState('preview');
+  const [showPreview, setShowPreview] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [categoryEditingId, setCategoryEditingId] = useState(null);
   const [categoryEditingName, setCategoryEditingName] = useState('');
@@ -168,7 +153,7 @@ export default function AdminPage() {
       guide || (categoryFilter !== '全部' ? { ...EMPTY_GUIDE, category: categoryFilter } : EMPTY_GUIDE);
     setCurrentGuide(formatGuide(baseGuide));
     setIsEditing(true);
-    setSideTab('preview');
+    setShowPreview(false);
     setStatusNote(null);
   };
 
@@ -716,260 +701,149 @@ export default function AdminPage() {
             <StatusNote note={statusNote} />
 
             {isEditing ? (
-              <section
+              <form
+                onSubmit={handleSave}
                 style={{
+                  background: '#fbfaf7',
+                  border: '1px solid var(--border)',
+                  borderRadius: '16px',
+                  padding: '28px',
                   display: 'grid',
-                  gridTemplateColumns: 'minmax(0, 1.7fr) minmax(280px, 0.9fr)',
-                  gap: '24px',
-                  alignItems: 'start',
+                  gap: '28px',
                 }}
               >
-                <form
-                  onSubmit={handleSave}
-                  style={{
-                    background: '#fbfaf7',
-                    border: '1px solid var(--border)',
-                    borderRadius: '16px',
-                    padding: '28px',
-                    display: 'grid',
-                    gap: '28px',
-                  }}
-                >
-                  <div style={{ display: 'grid', gap: '10px' }}>
-                    <div style={{ fontSize: '12px', letterSpacing: '0.08em', color: '#8a7d70' }}>
-                      {currentGuide.id ? '内容修订' : '新稿录入'}
-                    </div>
-                    <h2 style={{ fontSize: '30px', lineHeight: 1.4, marginBottom: 0 }}>
-                      {currentGuide.id ? '编辑现有攻略' : '撰写新攻略'}
-                    </h2>
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  <div style={{ fontSize: '12px', letterSpacing: '0.08em', color: '#8a7d70' }}>
+                    {currentGuide.id ? '内容修订' : '新稿录入'}
                   </div>
+                  <h2 style={{ fontSize: '30px', lineHeight: 1.4, marginBottom: 0 }}>
+                    {currentGuide.id ? '编辑现有攻略' : '撰写新攻略'}
+                  </h2>
+                </div>
 
-                  <div style={{ display: 'grid', gap: '18px' }}>
-                    <Field label="标题" hint={'建议直接写成读者能一眼看懂的章节名，例如「副本攻略一站式指南」。'}>
+                <div style={{ display: 'grid', gap: '18px' }}>
+                  <Field label="标题" hint={'建议直接写成读者能一眼看懂的章节名，例如「副本攻略一站式指南」。'}>
+                    <input
+                      required
+                      value={currentGuide.title}
+                      onChange={(e) => setCurrentGuide({ ...currentGuide, title: e.target.value })}
+                      style={inputStyle}
+                    />
+                  </Field>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                    <Field label="分类" hint="例如：副本攻略、职业攻略、配装整理。">
                       <input
                         required
-                        value={currentGuide.title}
-                        onChange={(e) => setCurrentGuide({ ...currentGuide, title: e.target.value })}
+                        list="guide-category-options"
+                        value={currentGuide.category}
+                        onChange={(e) => setCurrentGuide({ ...currentGuide, category: e.target.value })}
+                        placeholder="例如：副本攻略"
                         style={inputStyle}
                       />
                     </Field>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                      <Field label="分类" hint="例如：副本攻略、职业攻略、配装整理。">
-                        <input
-                          required
-                          list="guide-category-options"
-                          value={currentGuide.category}
-                          onChange={(e) => setCurrentGuide({ ...currentGuide, category: e.target.value })}
-                          placeholder="例如：副本攻略"
-                          style={inputStyle}
-                        />
-                      </Field>
-                      <Field label="标记符号" hint="可选，选择一个墨线图标或保留 emoji 短标记。">
-                        <IconPicker
-                          value={currentGuide.emoji}
-                          onChange={(emoji) => setCurrentGuide({ ...currentGuide, emoji })}
-                        />
-                      </Field>
-                    </div>
-
-                    <datalist id="guide-category-options">
-                      {categoryOptions.map((category) => (
-                        <option key={category} value={category} />
-                      ))}
-                    </datalist>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                      <Field label="发布日期" hint="不填则默认使用今天，用于详情页显示更新时间。">
-                        <input
-                          type="date"
-                          value={getGuideDateValue(currentGuide.date)}
-                          onChange={(e) => setCurrentGuide({ ...currentGuide, date: e.target.value })}
-                          style={inputStyle}
-                        />
-                      </Field>
-                      <Field label="顺序值" hint="数字越小越靠前；不填时会自动排到当前列表后方。">
-                        <input
-                          type="number"
-                          value={currentGuide.sort_order}
-                          onChange={(e) => setCurrentGuide({ ...currentGuide, sort_order: e.target.value })}
-                          placeholder="例如：10"
-                          style={inputStyle}
-                        />
-                      </Field>
-                    </div>
-
-                    <Field label="显示设置" hint="顶置内容会优先展示在首页与攻略全集顶部。">
-                      <label style={toggleRowStyle}>
-                        <input
-                          type="checkbox"
-                          checked={Boolean(currentGuide.recommend)}
-                          onChange={(e) => setCurrentGuide({ ...currentGuide, recommend: e.target.checked })}
-                        />
-                        <span>设为顶置攻略</span>
-                      </label>
-                    </Field>
-
-                    <Field label="发布状态" hint="草稿只在后台可见；发布后才会出现在首页与攻略全集。">
-                      <select
-                        value={currentGuide.status}
-                        onChange={(e) => setCurrentGuide({ ...currentGuide, status: e.target.value })}
-                        style={{ ...inputStyle, padding: '0 10px' }}
-                      >
-                        <option value="draft">草稿</option>
-                        <option value="published">发布</option>
-                      </select>
-                    </Field>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-                      <Field label="封面图" hint="首页/列表卡片上的图片。可粘贴 URL 或拖拽上传。">
-                        <ImageUpload
-                          value={currentGuide.cover_image}
-                          onChange={(url) => setCurrentGuide({ ...currentGuide, cover_image: url })}
-                        />
-                      </Field>
-                      <Field label="头图" hint="攻略详情页顶部大图。可粘贴 URL 或拖拽上传。">
-                        <ImageUpload
-                          value={currentGuide.banner_image}
-                          onChange={(url) => setCurrentGuide({ ...currentGuide, banner_image: url })}
-                        />
-                      </Field>
-                    </div>
-
-                    <Field label="简介" hint="列表页中显示的摘要，建议控制在 40 到 80 字之间。">
-                      <textarea
-                        required
-                        value={currentGuide.excerpt}
-                        onChange={(e) => setCurrentGuide({ ...currentGuide, excerpt: e.target.value })}
-                        rows={4}
-                        style={textareaStyle}
+                    <Field label="标记符号" hint="可选，选择一个墨线图标或保留 emoji 短标记。">
+                      <IconPicker
+                        value={currentGuide.emoji}
+                        onChange={(emoji) => setCurrentGuide({ ...currentGuide, emoji })}
                       />
                     </Field>
+                  </div>
 
-                    <Field
-                      label="正文内容"
-                      hint="支持 Markdown、小标题、列表、普通 HTML，以及 B 站 iframe 嵌入代码。"
+                  <datalist id="guide-category-options">
+                    {categoryOptions.map((category) => (
+                      <option key={category} value={category} />
+                    ))}
+                  </datalist>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                    <Field label="发布日期" hint="不填则默认使用今天，用于详情页显示更新时间。">
+                      <input
+                        type="date"
+                        value={getGuideDateValue(currentGuide.date)}
+                        onChange={(e) => setCurrentGuide({ ...currentGuide, date: e.target.value })}
+                        style={inputStyle}
+                      />
+                    </Field>
+                    <Field label="顺序值" hint="数字越小越靠前；不填时会自动排到当前列表后方。">
+                      <input
+                        type="number"
+                        value={currentGuide.sort_order}
+                        onChange={(e) => setCurrentGuide({ ...currentGuide, sort_order: e.target.value })}
+                        placeholder="例如：10"
+                        style={inputStyle}
+                      />
+                    </Field>
+                  </div>
+
+                  <Field label="显示设置" hint="顶置内容会优先展示在首页与攻略全集顶部。">
+                    <label style={toggleRowStyle}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(currentGuide.recommend)}
+                        onChange={(e) => setCurrentGuide({ ...currentGuide, recommend: e.target.checked })}
+                      />
+                      <span>设为顶置攻略</span>
+                    </label>
+                  </Field>
+
+                  <Field label="发布状态" hint="草稿只在后台可见；发布后才会出现在首页与攻略全集。">
+                    <select
+                      value={currentGuide.status}
+                      onChange={(e) => setCurrentGuide({ ...currentGuide, status: e.target.value })}
+                      style={{ ...inputStyle, padding: '0 10px' }}
                     >
-                      <textarea
-                        required
-                        value={currentGuide.content}
-                        onChange={(e) => setCurrentGuide({ ...currentGuide, content: e.target.value })}
-                        rows={18}
-                        style={{ ...textareaStyle, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' }}
+                      <option value="draft">草稿</option>
+                      <option value="published">发布</option>
+                    </select>
+                  </Field>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                    <Field label="封面图" hint="首页/列表卡片上的图片。可粘贴 URL 或拖拽上传。">
+                      <ImageUpload
+                        value={currentGuide.cover_image}
+                        onChange={(url) => setCurrentGuide({ ...currentGuide, cover_image: url })}
+                      />
+                    </Field>
+                    <Field label="头图" hint="攻略详情页顶部大图。可粘贴 URL 或拖拽上传。">
+                      <ImageUpload
+                        value={currentGuide.banner_image}
+                        onChange={(url) => setCurrentGuide({ ...currentGuide, banner_image: url })}
                       />
                     </Field>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', paddingTop: '4px' }}>
-                    <ActionButton type="submit" variant="primary" disabled={isSaving}>
-                      {isSaving ? '保存中...' : currentGuide.id ? '保存修订' : '收录攻略'}
-                    </ActionButton>
-                    <ActionButton type="button" variant="secondary" onClick={closeEditor} disabled={isSaving}>
-                      暂停编写
-                    </ActionButton>
-                  </div>
-                </form>
+                  <Field label="简介" hint="列表页中显示的摘要，建议控制在 40 到 80 字之间。">
+                    <textarea
+                      required
+                      value={currentGuide.excerpt}
+                      onChange={(e) => setCurrentGuide({ ...currentGuide, excerpt: e.target.value })}
+                      rows={4}
+                      style={textareaStyle}
+                    />
+                  </Field>
 
-                <aside style={{ display: 'grid', gap: '16px' }}>
-                  <div style={sideCardStyle}>
-                    <div style={sideEyebrowStyle}>当前稿件</div>
-                    <div style={{ fontSize: '22px', lineHeight: 1.5, marginBottom: '10px' }}>
-                      {currentGuide.title || '未命名稿件'}
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      <span style={tagStyle}>{currentGuide.category || '待定分类'}</span>
-                      <span style={tagStyle}>{currentGuide.id ? '修订中' : '新稿'}</span>
-                      {currentGuide.recommend ? <span style={tagStyle}>顶置</span> : null}
-                      {currentGuide.status === 'draft' ? <span style={tagStyle}>草稿</span> : <span style={tagStyle}>已发布</span>}
-                      <span style={tagStyle}>顺序 {currentGuide.sort_order || '自动'}</span>
-                    </div>
-                  </div>
+                  <Field label="正文内容" hint="富文本编辑器，支持加粗、斜体、标题、列表、链接、图片上传。可用 Ctrl+B / Ctrl+I 等快捷键。">
+                    <RichTextEditor
+                      value={currentGuide.content}
+                      onChange={(html) => setCurrentGuide({ ...currentGuide, content: html })}
+                      placeholder="开始撰写正文..."
+                    />
+                  </Field>
+                </div>
 
-                  <div style={sideCardStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
-                      <div style={sideEyebrowStyle}>右侧面板</div>
-                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {[
-                          { key: 'preview', label: '实时预览' },
-                          { key: 'tips', label: '编写提示' },
-                          { key: 'example', label: '格式参考' },
-                        ].map((item) => {
-                          const active = sideTab === item.key;
-                          return (
-                            <button
-                              key={item.key}
-                              type="button"
-                              onClick={() => setSideTab(item.key)}
-                              style={{
-                                ...tagStyle,
-                                cursor: 'pointer',
-                                background: active ? '#5f7f67' : '#fbfaf7',
-                                color: active ? '#f9f8f4' : '#5d554d',
-                                border: active ? '1px solid #5f7f67' : '1px solid var(--border)',
-                              }}
-                            >
-                              {item.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {sideTab === 'preview' ? (
-                      <div style={{ display: 'grid', gap: '12px' }}>
-                        {currentGuide.banner_image ? (
-                          <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                            <Image
-                              src={currentGuide.banner_image}
-                              alt={currentGuide.title || 'banner'}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 400px"
-                              style={{ objectFit: 'cover' }}
-                            />
-                          </div>
-                        ) : currentGuide.cover_image ? (
-                          <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                            <Image
-                              src={currentGuide.cover_image}
-                              alt={currentGuide.title || 'cover'}
-                              fill
-                              sizes="(max-width: 768px) 100vw, 400px"
-                              style={{ objectFit: 'cover' }}
-                            />
-                          </div>
-                        ) : null}
-                        <div style={previewBoxStyle}>
-                          {currentGuide.content ? (
-                            <MarkdownRenderer content={currentGuide.content} />
-                          ) : (
-                            <div style={{ color: '#8a7d70', fontSize: '13px' }}>开始输入正文后，这里会实时显示预览效果。</div>
-                          )}
-                        </div>
-                      </div>
-                    ) : sideTab === 'tips' ? (
-                      <ul style={{ margin: 0, paddingLeft: '18px', color: '#6f665d', lineHeight: 1.9 }}>
-                        <li>先写副本概览，再拆首领机制、站位和时间轴。</li>
-                        <li>每个小标题尽量只承担一个主题，方便读者快速扫读。</li>
-                        <li>视频建议放在对应首领段落下，不要一次堆太多。</li>
-                      </ul>
-                    ) : (
-                      <pre
-                        style={{
-                          margin: 0,
-                          whiteSpace: 'pre-wrap',
-                          wordBreak: 'break-word',
-                          fontSize: '12px',
-                          lineHeight: 1.8,
-                          color: '#5d554d',
-                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-                        }}
-                      >
-                        {CONTENT_EXAMPLE}
-                      </pre>
-                    )}
-                  </div>
-                </aside>
-              </section>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', paddingTop: '4px' }}>
+                  <ActionButton type="submit" variant="primary" disabled={isSaving}>
+                    {isSaving ? '保存中...' : currentGuide.id ? '保存修订' : '收录攻略'}
+                  </ActionButton>
+                  <ActionButton type="button" variant="secondary" onClick={() => setShowPreview(true)}>
+                    预览效果
+                  </ActionButton>
+                  <ActionButton type="button" variant="ghost" onClick={closeEditor} disabled={isSaving}>
+                    取消编辑
+                  </ActionButton>
+                </div>
+              </form>
             ) : viewMode === 'categories' ? (
               <section style={{ display: 'grid', gap: '18px' }}>
                 <div>
@@ -1269,6 +1143,15 @@ export default function AdminPage() {
           </>
         )}
       </main>
+
+      <PreviewModal
+        open={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={currentGuide.title}
+        bannerImage={currentGuide.banner_image}
+        content={currentGuide.content}
+        category={currentGuide.category}
+      />
 
       <ConfirmDialog
         guide={pendingDeleteGuide}

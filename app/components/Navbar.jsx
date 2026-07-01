@@ -12,6 +12,7 @@ export default function Navbar() {
         <Link href="/">首页</Link>
         <Link href="/guides">攻略全集</Link>
         <Link href="/calendar">活动日历</Link>
+        <Link href="/announcements">公告解读</Link>
         <Link href="/tools">辅助工具</Link>
       </div>
     </nav>

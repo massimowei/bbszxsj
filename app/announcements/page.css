@@ -1,0 +1,166 @@
+/* ── Announcements List Page ── */
+.announcements-page-intro {
+  text-align: center;
+  padding: 40px 0 48px;
+}
+
+.announcements-page-title {
+  font-size: 32px;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.announcements-page-subtitle {
+  font-size: 15px;
+  color: #666;
+  letter-spacing: 0.04em;
+  line-height: 1.8;
+}
+
+.announcements-full-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+}
+
+.announcement-full-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fbfaf7;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.announcement-full-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.announcement-full-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #f0ede6;
+  overflow: hidden;
+}
+
+.announcement-full-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.announcement-full-cover-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0ede6;
+}
+
+.announcement-full-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.announcement-full-tag {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  margin-bottom: 10px;
+  border-bottom: 1.5px solid currentColor;
+  align-self: flex-start;
+}
+
+.announcement-full-title {
+  font-size: 17px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  color: var(--text);
+  letter-spacing: 0.04em;
+}
+
+.announcement-full-excerpt {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.7;
+  margin-bottom: 12px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  flex: 1;
+}
+
+.announcement-full-date {
+  font-size: 12px;
+  color: #999;
+  letter-spacing: 0.05em;
+  margin-top: auto;
+}
+
+.back-link {
+  color: #999;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+/* ── Announcement Detail Page ── */
+.announcement-detail-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-bottom: 28px;
+  background: #f0ede6;
+}
+
+.announcement-detail-tag {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid currentColor;
+}
+
+.announcement-detail-title {
+  font-size: 36px;
+  line-height: 1.4;
+  margin-bottom: 16px;
+  color: var(--text);
+  letter-spacing: 0.06em;
+}
+
+.announcement-detail-meta {
+  font-size: 14px;
+  color: #999;
+  letter-spacing: 0.05em;
+  margin-bottom: 40px;
+}
+
+.announcement-detail-content {
+  padding: 32px 0;
+  line-height: 2;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.announcement-detail-empty {
+  padding: 48px 0;
+  text-align: center;
+  color: #999;
+  font-size: 15px;
+}

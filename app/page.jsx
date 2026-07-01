@@ -79,35 +79,42 @@ export default async function Home() {
 
         {/* ── Official Announcement Interpretation (always visible) ── */}
         <section className="interpretation-section">
-          <h2 className="section-title">官方公告解读</h2>
+          <h2 className="section-title">
+            官方公告解读
+            <Link href="/announcements" className="section-more">查看全部 →</Link>
+          </h2>
           {interpretations.length > 0 ? (
-            <div className="interpretation-grid">
+            <div className="announcements-row">
               {interpretations.map((item) => (
-                <div key={item.id} className="interpretation-card">
+                <Link key={item.id} href={`/announcements/${item.id}`} className="announcement-row-card">
                   {item.cover_image ? (
-                    <div className="interpretation-cover">
+                    <div className="announcement-row-cover">
                       <Image
                         src={item.cover_image}
                         alt={item.title}
                         fill
-                        sizes="(max-width: 768px) 100vw, 480px"
+                        sizes="(max-width: 768px) 50vw, 25vw"
                         style={{ objectFit: 'cover' }}
                       />
                     </div>
                   ) : (
-                    <div className="interpretation-cover interpretation-cover-empty">
-                      <IconScroll color="#e6e2da" size={36} />
+                    <div className="announcement-row-cover announcement-row-cover-empty">
+                      <IconScroll color="#e6e2da" size={28} />
                     </div>
                   )}
-                  <div className="interpretation-body">
-                    <span className="interpretation-tag" style={{ color: TYPE_META.interpretation.color }}>
+                  <div className="announcement-row-body">
+                    <span className="announcement-row-tag" style={{ color: TYPE_META.interpretation.color }}>
                       {TYPE_META.interpretation.label}
                     </span>
-                    <h3 className="interpretation-title">{item.title}</h3>
-                    {item.content ? <p className="interpretation-excerpt">{item.content}</p> : null}
-                    <span className="interpretation-date">{new Date(item.created_at).toLocaleDateString('zh-CN')}</span>
+                    <h3 className="announcement-row-title">{item.title}</h3>
+                    {item.content ? (
+                      <p className="announcement-row-excerpt">{item.content}</p>
+                    ) : null}
+                    <span className="announcement-row-date">
+                      {new Date(item.created_at).toLocaleDateString('zh-CN')}
+                    </span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (
@@ -122,17 +129,21 @@ export default async function Home() {
         {regularAnnouncements.length > 0 ? (
           <section className="announcements-section">
             <h2 className="section-title">公告栏</h2>
-            <div className="announcements-list">
+            <div className="announcements-row">
               {regularAnnouncements.map((a) => {
                 const meta = TYPE_META[a.type] || TYPE_META.info;
                 return (
-                  <div key={a.id} className="announcement-item" style={{ borderLeftColor: meta.color }}>
-                    <span className="announcement-dot" style={{ background: meta.color }} />
-                    <span className="announcement-type" style={{ color: meta.color }}>{meta.label}</span>
-                    <span className="announcement-title">{a.title}</span>
-                    {a.content ? <span className="announcement-content">{a.content}</span> : null}
-                    <span className="announcement-date">{new Date(a.created_at).toLocaleDateString('zh-CN')}</span>
-                  </div>
+                  <Link key={a.id} href={`/announcements/${a.id}`} className="announcement-row-card">
+                    <span className="announcement-row-dot" style={{ background: meta.color }} />
+                    <span className="announcement-row-tag" style={{ color: meta.color }}>{meta.label}</span>
+                    <h3 className="announcement-row-title">{a.title}</h3>
+                    {a.content ? (
+                      <p className="announcement-row-excerpt">{a.content}</p>
+                    ) : null}
+                    <span className="announcement-row-date">
+                      {new Date(a.created_at).toLocaleDateString('zh-CN')}
+                    </span>
+                  </Link>
                 );
               })}
             </div>

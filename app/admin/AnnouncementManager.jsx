@@ -6,6 +6,7 @@ import Field from './components/Field';
 import StatusNote from './components/StatusNote';
 import ConfirmDialog from './components/ConfirmDialog';
 import ImageUpload from './components/ImageUpload';
+import RichTextEditor from './components/RichTextEditor';
 import { inputStyle, textareaStyle, tagStyle, sideCardStyle } from './styles';
 
 const EMPTY_ANNOUNCEMENT = {
@@ -238,8 +239,12 @@ export default function AnnouncementManager() {
               </Field>
             ) : null}
 
-            <Field label="内容" hint={isInterpretation ? '解读摘要，首页卡片会截断显示3行。' : '可选，补充说明文字。'}>
-              <textarea value={currentAnn.content} onChange={(e) => setCurrentAnn({ ...currentAnn, content: e.target.value })} rows={isInterpretation ? 4 : 3} style={textareaStyle} />
+            <Field label="内容" hint={isInterpretation ? '解读正文，支持富文本排版和图片上传。首页卡片会截断显示。' : '可选，支持富文本排版。'}>
+              <RichTextEditor
+                value={currentAnn.content}
+                onChange={(html) => setCurrentAnn({ ...currentAnn, content: html })}
+                placeholder={isInterpretation ? '开始撰写解读正文...' : '开始撰写公告正文...'}
+              />
             </Field>
 
             <Field label="启用状态">
