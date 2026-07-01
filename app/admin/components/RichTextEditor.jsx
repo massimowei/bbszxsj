@@ -145,12 +145,14 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
         border: '1px solid var(--border)',
         borderRadius: 12,
         background: '#fbfaf7',
-        overflow: 'hidden',
       }}
     >
-      {/* ── Toolbar ── */}
+      {/* ── Sticky Toolbar ── */}
       <div
         style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 20,
           display: 'flex',
           flexWrap: 'wrap',
           gap: 2,
@@ -158,6 +160,7 @@ export default function RichTextEditor({ value, onChange, placeholder }) {
           borderBottom: '1px solid #e8e4da',
           background: '#f7f5ef',
           alignItems: 'center',
+          borderRadius: '12px 12px 0 0',
         }}
       >
         {/* Text style */}

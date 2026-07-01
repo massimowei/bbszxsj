@@ -156,7 +156,7 @@ export default async function Home() {
             <h2 className="section-title">热门攻略</h2>
             <div className="hot-guides-grid">
               {recommendGuides.map((guide) => (
-                <div className="hot-guide-card" key={guide.id}>
+                <Link href={`/guides/${guide.id}`} className="hot-guide-card" key={guide.id}>
                   {guide.cover_image ? (
                     <div className="hot-guide-cover">
                       <Image
@@ -176,9 +176,9 @@ export default async function Home() {
                     <span className="guide-tag">{guide.category}</span>
                     <h3 className="hot-guide-title">{guide.title}</h3>
                     <p className="hot-guide-excerpt">{guide.excerpt}</p>
-                    <Link href={`/guides/${guide.id}`} className="guide-link">阅读详情 →</Link>
+                    <span className="guide-link">阅读详情 →</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
             <div className="hot-guides-more">
