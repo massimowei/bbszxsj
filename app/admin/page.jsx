@@ -11,7 +11,7 @@ import StatusNote from './components/StatusNote';
 import ConfirmDialog from './components/ConfirmDialog';
 import IconPicker from './components/IconPicker';
 import ImageUpload from './components/ImageUpload';
-import RichTextEditor from './components/RichTextEditor';
+import TinyEditor from './components/TinyEditor';
 import PreviewModal from './components/PreviewModal';
 import EventManager from './EventManager';
 import AnnouncementManager from './AnnouncementManager';
@@ -823,8 +823,8 @@ export default function AdminPage() {
                     />
                   </Field>
 
-                  <Field label="正文内容" hint="富文本编辑器，支持加粗、斜体、标题、列表、链接、图片上传。可用 Ctrl+B / Ctrl+I 等快捷键。">
-                    <RichTextEditor
+                  <Field label="正文内容" hint="TinyMCE 富文本编辑器，支持加粗、斜体、标题、列表、表格、链接、图片上传。直接粘贴 HTML / Markdown 即可。">
+                    <TinyEditor
                       value={currentGuide.content}
                       onChange={(html) => setCurrentGuide({ ...currentGuide, content: html })}
                       placeholder="开始撰写正文..."

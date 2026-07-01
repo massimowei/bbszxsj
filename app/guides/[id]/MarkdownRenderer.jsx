@@ -4,13 +4,16 @@ import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 
-/* Extended sanitize schema: allow iframe (B站), <u> (rich text underline), style/class attrs */
+/* Extended sanitize schema: allow iframe (B站), <u> (rich text underline), table elements, style/class attrs */
 const sanitizeSchema = {
   ...defaultSchema,
   tagNames: [
     ...(defaultSchema.tagNames || []),
     'iframe',
     'u',
+    'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+    'colgroup', 'col', 'caption',
+    'span', 'div',
   ],
   attributes: {
     ...defaultSchema.attributes,
@@ -22,6 +25,8 @@ const sanitizeSchema = {
       ...(defaultSchema.attributes?.img || []),
       'width', 'height', 'loading',
     ],
+    th: ['style', 'class', 'colspan', 'rowspan', 'scope', 'align', 'valign', 'width', 'height'],
+    td: ['style', 'class', 'colspan', 'rowspan', 'align', 'valign', 'width', 'height'],
     '*': [
       ...(defaultSchema.attributes?.['*'] || []),
       'style', 'className',
@@ -79,6 +84,34 @@ export default function MarkdownRenderer({ content }) {
       >
         {content}
       </ReactMarkdown>
+      <style jsx global>{`
+        .markdown-body table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1.2em 0;
+          font-size: 14px;
+          border-radius: 8px;
+          overflow: hidden;
+          border: 1px solid #d0ccc0;
+        }
+        .markdown-body th,
+        .markdown-body td {
+          border: 1px solid #d0ccc0;
+          padding: 10px 14px;
+          text-align: left;
+        }
+        .markdown-body th {
+          background: #f0ede5;
+          font-weight: 600;
+          color: #2d2a26;
+        }
+        .markdown-body td {
+          background: #fff;
+        }
+        .markdown-body tr:nth-child(even) td {
+          background: #faf9f5;
+        }
+      `}</style>
     </div>
   );
 }
